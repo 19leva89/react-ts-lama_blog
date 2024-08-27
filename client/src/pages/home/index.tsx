@@ -1,28 +1,29 @@
-import React, { useEffect, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { useEffect, useState } from 'react'
+import { Link, useLocation } from 'react-router-dom'
 
-import axios from "axios";
+import { UserPost } from '../../types'
+import axios from 'axios'
 
 const Home = () => {
-	const [posts, setPosts] = useState([]);
+	const [posts, setPosts] = useState<UserPost[]>([])
 
 	const category = useLocation().search
 
 	useEffect(() => {
 		const fetchData = async () => {
 			try {
-				const res = await axios.get(`/posts${category}`);
-				setPosts(res.data);
+				const res = await axios.get(`/posts${category}`)
+				setPosts(res.data)
 			} catch (err) {
-				console.log(err);
+				console.log(err)
 			}
-		};
+		}
 
-		fetchData();
-	}, [category]);
+		fetchData()
+	}, [category])
 
-	const getText = (html) => {
-		const doc = new DOMParser().parseFromString(html, "text/html")
+	const getText = (html: string) => {
+		const doc = new DOMParser().parseFromString(html, 'text/html')
 		return doc.body.textContent
 	}
 
@@ -40,7 +41,7 @@ const Home = () => {
 								<h1>{post.title}</h1>
 							</Link>
 
-							<p>{getText(post.description)}</p>
+							<p>{getText(post.description || '')}</p>
 
 							<Link className="link" to={`/post/${post.id}`}>
 								<button>Read More</button>
@@ -50,7 +51,7 @@ const Home = () => {
 				))}
 			</div>
 		</div>
-	);
-};
+	)
+}
 
-export default Home;
+export default Home

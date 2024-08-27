@@ -1,24 +1,30 @@
-import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { FC, useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 
-import axios from "axios";
+import axios from 'axios'
+import { UserPost } from '../../types'
 
-const Menu = ({ category, currentPostId }) => {
-	const [posts, setPosts] = useState([]);
+type Props = {
+	category: string
+	currentPostId: number
+}
+
+const Menu: FC<Props> = ({ category, currentPostId }) => {
+	const [posts, setPosts] = useState<UserPost[]>([])
 
 	useEffect(() => {
 		const fetchData = async () => {
 			try {
-				const res = await axios.get(`/posts/?category=${category}`);
+				const res = await axios.get(`/posts/?category=${category}`)
 
-				setPosts(res.data);
+				setPosts(res.data)
 			} catch (err) {
-				console.log(err);
+				console.log(err)
 			}
-		};
+		}
 
-		fetchData();
-	}, [category]);
+		fetchData()
+	}, [category])
 
 	return (
 		<div className="menu">
@@ -40,7 +46,7 @@ const Menu = ({ category, currentPostId }) => {
 					</div>
 				))}
 		</div>
-	);
-};
+	)
+}
 
-export default Menu;
+export default Menu

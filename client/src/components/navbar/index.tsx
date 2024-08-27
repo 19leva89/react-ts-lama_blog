@@ -1,14 +1,14 @@
-import React, { useContext } from "react";
-import { Link } from "react-router-dom";
+import { FC, useContext } from 'react'
+import { Link } from 'react-router-dom'
 
-import { AuthContext } from "../../context/authContext";
+import { AuthContext, AuthContextType } from '../../context/authContext'
 
-import LoginIcon from '@mui/icons-material/Login';
-import LogoutIcon from '@mui/icons-material/Logout';
-import Logo from "../../img/logo.svg";
+import LoginIcon from '@mui/icons-material/Login'
+import LogoutIcon from '@mui/icons-material/Logout'
+import Logo from '../../img/logo.svg'
 
-const Navbar = () => {
-	const { currentUser, logout } = useContext(AuthContext);
+const Navbar: FC = () => {
+	const { currentUser, logout } = useContext(AuthContext) as AuthContextType
 
 	return (
 		<div className="navbar">
@@ -64,7 +64,7 @@ const Navbar = () => {
 				</div>
 			</div>
 		</div>
-	);
-};
+	)
+}
 
-export default Navbar;
+export default Navbar

@@ -1,14 +1,14 @@
-import { createBrowserRouter, RouterProvider, Outlet } from "react-router-dom";
+import { createBrowserRouter, RouterProvider, Outlet } from 'react-router-dom'
 
-import Home from "./pages/home";
-import Login from "./pages/login";
-import Register from "./pages/register";
-import Write from "./pages/write";
-import Single from "./pages/single";
+import Home from './pages/home'
+import Login from './pages/login'
+import Register from './pages/register'
+import Write from './pages/write'
+import Single from './pages/single'
 
-import Navbar from "./components/navbar";
-import Footer from "./components/footer";
-import "./styles/main.scss"
+import Navbar from './components/navbar'
+import Footer from './components/footer'
+import './styles/main.scss'
 
 const Layout = () => {
 	return (
@@ -17,37 +17,37 @@ const Layout = () => {
 			<Outlet />
 			<Footer />
 		</>
-	);
-};
+	)
+}
 
 const router = createBrowserRouter([
 	{
-		path: "/",
+		path: '/',
 		element: <Layout />,
 		children: [
 			{
-				path: "/",
+				path: '/',
 				element: <Home />,
 			},
 			{
-				path: "/post/:id",
+				path: '/post/:id',
 				element: <Single />,
 			},
 			{
-				path: "/write",
+				path: '/write',
 				element: <Write />,
 			},
 		],
 	},
 	{
-		path: "/register",
+		path: '/register',
 		element: <Register />,
 	},
 	{
-		path: "/login",
+		path: '/login',
 		element: <Login />,
 	},
-]);
+])
 
 function App() {
 	return (
@@ -56,7 +56,7 @@ function App() {
 				<RouterProvider router={router} />
 			</div>
 		</div>
-	);
+	)
 }
 
-export default App;
+export default App
