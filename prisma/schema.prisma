@@ -1,0 +1,43 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Users {
+  id       Int     @id @default(autoincrement())
+  username String  @db.VarChar(45)
+  email    String  @db.VarChar(45)
+  password String  @db.VarChar(200)
+  img      String? @db.VarChar(300)
+
+  // Relations
+  posts Posts[]
+
+  @@unique([id])
+}
+
+model Posts {
+  id          Int      @id @default(autoincrement())
+  title       String   @db.VarChar(255)
+  description String   @db.VarChar(1000)
+  img         String   @db.VarChar(300)
+  date        DateTime @db.DateTime
+  userId      Int
+  category    String?  @db.VarChar(45)
+
+  // Relations
+  user Users @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade, map: "userId")
+
+  @@unique([id])
+  @@index([userId], name: "userId")
+}

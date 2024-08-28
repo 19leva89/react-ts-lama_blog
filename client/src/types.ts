@@ -10,7 +10,7 @@ export interface User {
 	username: string
 	email: string
 	password: string
-	img: string
+	img?: string
 }
 
 export interface UserPost {
@@ -20,7 +20,7 @@ export interface UserPost {
 	img: string
 	date: Date
 	userId: number
-	category: string
+	category?: string
 	username: string
 	userImg: string
 }

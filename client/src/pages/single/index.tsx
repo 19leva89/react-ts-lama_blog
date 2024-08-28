@@ -26,6 +26,7 @@ const Single = () => {
 		const fetchData = async () => {
 			try {
 				const res = await axios.get(`/posts/${postId}`)
+
 				setPost(res.data)
 			} catch (err) {
 				console.log(err)
@@ -62,7 +63,7 @@ const Single = () => {
 				{post.img && <img src={`../upload/${post.img}`} alt={post.title || 'Post Image'} />}
 
 				<div className="user">
-					{post.userId && <img src={`../upload/${post.userImg}`} alt={post.username} />}
+					{post.id && <img src={`../upload/${post.userImg}`} alt={post.username} />}
 
 					<div className="info">
 						<span>{post.username}</span>
@@ -85,7 +86,6 @@ const Single = () => {
 
 				<p>{getText(post.description || '')}</p>
 			</div>
-
 			<Menu category={post.category || ''} currentPostId={post.id || 0} />
 		</div>
 	)
