@@ -7,10 +7,10 @@ import moment from 'moment'
 import TinyMCEEditor from '../../components/tinymce-editor'
 
 const Write = () => {
-	const state = useLocation().state
+	const { state } = useLocation()
 	const [title, setTitle] = useState(state?.title || '')
 	const [description, setDescription] = useState(state?.description || '')
-	const [file, setFile] = useState(state?.file || '')
+	const [file, setFile] = useState<File | null>(null)
 	const [category, setCategory] = useState(state?.category || '')
 	const [previewImage, setPreviewImage] = useState(state?.img || '')
 
@@ -19,16 +19,21 @@ const Write = () => {
 	useEffect(() => {
 		if (file) {
 			const reader = new FileReader()
-			reader.onloadend = () => {
-				setPreviewImage(reader.result)
-			}
+			reader.onloadend = () => setPreviewImage(reader.result as string)
+
 			reader.readAsDataURL(file)
 		} else {
 			setPreviewImage(state?.img || '')
 		}
 	}, [file, state?.img])
 
-	const upload = async () => {
+	const uploadImage = async () => {
+		if (!file) {
+			console.error('No file selected for upload.')
+			alert('Please select a file to upload.')
+			return null
+		}
+
 		try {
 			const formData = new FormData()
 			formData.append('file', file)
@@ -36,7 +41,9 @@ const Write = () => {
 			const res = await axios.post('/upload', formData)
 			return res.data
 		} catch (err) {
-			console.log(err)
+			console.error('Image upload failed:', err)
+			alert('Image upload failed. Please try again.')
+			return null
 		}
 	}
 
@@ -46,37 +53,34 @@ const Write = () => {
 		let imgUrl = previewImage
 
 		if (file) {
-			imgUrl = await upload()
-			if (!imgUrl) {
+			const uploadedImageUrl = await uploadImage()
+
+			if (!uploadedImageUrl) {
 				console.error('Image upload failed')
 				return
 			}
+			imgUrl = uploadedImageUrl
+		}
+
+		const postData = {
+			title,
+			description,
+			img: imgUrl || state.img || null,
+			date: moment().format('YYYY-MM-DD HH:mm:ss'),
+			category,
 		}
 
 		try {
-			const postData = {
-				title,
-				description,
-				category,
-				img: imgUrl || state?.img || null,
-			}
-
 			if (state) {
 				await axios.put(`/posts/${state.id}`, postData)
-				// console.log("Post updated successfully, ID:", state.id);
-
-				navigate(`/post/${state.id}`) // Ensure this ID is defined
+				navigate(`/post/${state.id}`)
 			} else {
-				const response = await axios.post(`/posts/`, {
-					...postData,
-					date: moment(Date.now()).format('YYYY-MM-DD HH:mm:ss'),
-				})
-				// console.log("New post created, ID:", response.data.id);
-
-				navigate(`/post/${response.data.id}`) // Use the newly created post ID
+				const response = await axios.post(`/posts/`, postData)
+				navigate(`/post/${response.data.id}`)
 			}
-		} catch (err) {
-			console.error('Failed to save post:', err)
+		} catch (error) {
+			console.error('Failed to save post:', error)
+			alert('Failed to save post. Please try again.')
 		}
 	}
 
@@ -119,6 +123,8 @@ const Write = () => {
 								const files = e.target.files
 								if (files && files.length > 0) {
 									setFile(files[0])
+								} else {
+									setFile(null)
 								}
 							}}
 						/>

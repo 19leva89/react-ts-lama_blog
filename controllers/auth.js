@@ -8,7 +8,7 @@ export const register = async (req, res) => {
 	try {
 		const { username, email, password } = req.body
 
-		// Проверка существующего пользователя по email или username
+		// Check existing user by email or username
 		const existingUser = await prisma.users.findFirst({
 			where: {
 				OR: [
@@ -22,11 +22,11 @@ export const register = async (req, res) => {
 			return res.status(409).json("User already exists!")
 		}
 
-		// Хэширование пароля
+		// Password Hashing
 		const salt = bcrypt.genSaltSync(10)
 		const hashedPassword = bcrypt.hashSync(password, salt)
 
-		// Создание нового пользователя
+		// Creating a new user
 		const newUser = await prisma.users.create({
 			data: {
 				username,
@@ -45,7 +45,7 @@ export const login = async (req, res) => {
 	try {
 		const { username, password } = req.body
 
-		// Проверка наличия пользователя
+		// Checking user availability
 		const user = await prisma.users.findFirst({
 			where: { username: username },
 		})
@@ -54,18 +54,18 @@ export const login = async (req, res) => {
 			return res.status(404).json("User not found!")
 		}
 
-		// Проверка правильности пароля
+		// Checking the password is correct
 		const isPasswordCorrect = bcrypt.compareSync(password, user.password)
 
 		if (!isPasswordCorrect) {
 			return res.status(400).json("Wrong username or password!")
 		}
 
-		// Генерация JWT токена
+		// JWT token generation
 		const secret = process.env.JWT_SECRET
 		const token = jwt.sign({ id: user.id }, secret)
 
-		// Удаление пароля из данных перед отправкой ответа
+		// Remove password from data before sending response
 		const { password: _, ...other } = user
 
 		res

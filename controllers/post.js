@@ -7,7 +7,7 @@ import { fileURLToPath } from 'url';
 
 const prisma = new PrismaClient()
 
-// Получаем __dirname для ES6 модулей
+// Getting __dirname for ES6 modules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
@@ -15,14 +15,14 @@ export const getPosts = async (req, res) => {
 	try {
 		const { category } = req.query;
 
-		// Если категория указана, фильтруем по ней, иначе получаем все посты
+		// If the category is specified, filter by it, otherwise get all posts
 		const posts = category
 			? await prisma.posts.findMany({
 				where: { category: category },
 			})
 			: await prisma.posts.findMany();
 
-		// Возвращаем посты клиенту
+		// Returning posts to the client
 		return res.status(200).json(posts);
 	} catch (error) {
 		return res.status(500).json({ error: 'Internal Server Error', details: error.message });
@@ -33,7 +33,7 @@ export const getPost = async (req, res) => {
 	try {
 		const postId = parseInt(req.params.id, 10);
 
-		// Выполняем запрос к базе данных
+		// Execute a query to the database
 		const post = await prisma.posts.findUnique({
 			where: { id: postId },
 			include: {
@@ -46,12 +46,12 @@ export const getPost = async (req, res) => {
 			},
 		});
 
-		// Если пост не найден, возвращаем 404
+		// If the post is not found, return 404
 		if (!post) {
 			return res.status(404).json({ error: 'Post not found' });
 		}
 
-		// Формируем объект с данными поста и автора
+		// Create an object with post and author data
 		const postData = {
 			id: post.id,
 			username: post.user.username,
@@ -63,7 +63,7 @@ export const getPost = async (req, res) => {
 			date: post.date,
 		};
 
-		// Возвращаем данные поста
+		// Returning post data
 		return res.status(200).json(postData);
 	} catch (error) {
 		return res.status(500).json({ error: 'Internal Server Error', details: error.message });
@@ -71,16 +71,16 @@ export const getPost = async (req, res) => {
 };
 
 export const addPost = async (req, res) => {
-	// Получаем токен из куки
+	// Getting a token from a cookie
 	const token = req.cookies.access_token;
 	if (!token) return res.status(401).json("Not authenticated!");
 
 	try {
-		// Проверяем токен и извлекаем информацию о пользователе
+		// Check the token and extract information about the user
 		const secret = process.env.JWT_SECRET;
 		const userInfo = jwt.verify(token, secret);
 
-		// Создаём новый пост
+		// Create a new post
 		const newPost = await prisma.posts.create({
 			data: {
 				title: req.body.title,
@@ -102,18 +102,18 @@ export const addPost = async (req, res) => {
 };
 
 export const deletePost = async (req, res) => {
-	// Получаем токен из куки
+	// Getting a token from a cookie
 	const token = req.cookies.access_token;
 	if (!token) return res.status(401).json("Not authenticated!");
 
 	try {
-		// Проверяем токен и извлекаем информацию о пользователе
+		// Check the token and extract information about the user
 		const secret = process.env.JWT_SECRET;
 		const userInfo = jwt.verify(token, secret);
 
-		const postId = parseInt(req.params.id, 10); // Приводим id к числу
+		const postId = parseInt(req.params.id, 10); // Convert id to a number
 
-		// Проверяем наличие поста и его принадлежность текущему пользователю
+		// Checking the existence of a post and its ownership by the current user
 		const post = await prisma.posts.findUnique({
 			where: {
 				id: postId,
@@ -128,15 +128,15 @@ export const deletePost = async (req, res) => {
 			return res.status(403).json("You can delete only your post!");
 		}
 
-		// Удаляем пост из базы данных
+		// Delete a post from the database
 		await prisma.posts.delete({
 			where: {
 				id: postId,
 			},
 		});
 
-		// Удаляем изображение из файловой системы
-		const imgName = post.img; // Получаем имя изображения
+		// Delete an image from the file system
+		const imgName = post.img; // Get the image name
 		const imagePath = path.join(__dirname, '..', 'client', 'public', 'upload', imgName);
 
 		fs.unlink(imagePath, (err) => {
@@ -155,20 +155,20 @@ export const deletePost = async (req, res) => {
 };
 
 export const updatePost = async (req, res) => {
-	// Получаем токен из куки
+	// Getting a token from a cookie
 	const token = req.cookies.access_token;
 	if (!token) {
 		return res.status(401).json("Not authenticated!");
 	}
 
 	try {
-		// Проверяем токен и извлекаем информацию о пользователе
+		// Check the token and extract information about the user
 		const secret = process.env.JWT_SECRET;
 		const userInfo = jwt.verify(token, secret);
 
-		const postId = parseInt(req.params.id, 10); // Приводим id к числу
+		const postId = parseInt(req.params.id, 10); // Convert id to a number
 
-		// Проверяем наличие поста и его принадлежность текущему пользователю
+		// Checking the existence of a post and its ownership by the current user
 		const post = await prisma.posts.findUnique({
 			where: {
 				id: postId,
@@ -183,9 +183,11 @@ export const updatePost = async (req, res) => {
 			return res.status(403).json("You can update only your post!");
 		}
 
-		const currentImg = post.img; // Получаем текущее изображение
+		const currentImg = post.img; // Get the current image
 
-		// Обновляем данные поста
+		const formattedDate = req.body.date ? new Date(req.body.date).toISOString() : undefined;
+
+		// Updating post data
 		const updatedPost = await prisma.posts.update({
 			where: {
 				id: postId,
@@ -195,14 +197,15 @@ export const updatePost = async (req, res) => {
 				description: req.body.description,
 				img: req.body.img,
 				category: req.body.category,
+				date: formattedDate,
 			},
 		});
 
-		// Удаляем старое изображение, если новое изображение отличается от текущего
+		// Delete the old image if the new image is different from the current one
 		if (currentImg && currentImg !== req.body.img) {
 			const imagePath = path.join(__dirname, '..', 'client', 'public', 'upload', currentImg);
 
-			// Удаляем изображение из файловой системы
+			// Delete an image from the file system
 			fs.unlink(imagePath, (err) => {
 				if (err) {
 					console.error("Failed to delete image:", err);
