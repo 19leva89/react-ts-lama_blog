@@ -1,58 +1,83 @@
-import { db } from "../db.js";
+import { PrismaClient } from '@prisma/client'
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
-export const register = (req, res) => {
-	// CHECK EXISTING USER
-	const q = "SELECT * FROM users WHERE email = ? OR username = ?";
+const prisma = new PrismaClient()
 
-	db.query(q, [req.body.email, req.body.username], (err, data) => {
-		if (err) return res.status(500).json(err);
-		if (data.length) return res.status(409).json("User already exists!");
+export const register = async (req, res) => {
+	try {
+		const { username, email, password } = req.body
 
-		// Hash the password and create a user
-		const salt = bcrypt.genSaltSync(10);
-		const hash = bcrypt.hashSync(req.body.password, salt);
+		// Проверка существующего пользователя по email или username
+		const existingUser = await prisma.users.findFirst({
+			where: {
+				OR: [
+					{ email: email },
+					{ username: username },
+				],
+			},
+		})
 
-		const q = "INSERT INTO users(`username`,`email`,`password`) VALUES (?)";
-		const values = [req.body.username, req.body.email, hash];
+		if (existingUser) {
+			return res.status(409).json("User already exists!")
+		}
 
-		db.query(q, [values], (err, data) => {
-			if (err) return res.status(500).json(err);
-			return res.status(200).json("User has been created.");
-		});
-	});
-};
+		// Хэширование пароля
+		const salt = bcrypt.genSaltSync(10)
+		const hashedPassword = bcrypt.hashSync(password, salt)
 
-export const login = (req, res) => {
-	// CHECK USER
-	const q = "SELECT * FROM users WHERE username = ?";
+		// Создание нового пользователя
+		const newUser = await prisma.users.create({
+			data: {
+				username,
+				email,
+				password: hashedPassword,
+			},
+		})
 
-	db.query(q, [req.body.username], (err, data) => {
-		if (err) return res.status(500).json(err);
-		if (data.length === 0) return res.status(404).json("User not found!");
+		return res.status(200).json("User has been created.")
+	} catch (error) {
+		return res.status(500).json({ error: 'Internal Server Error', details: error.message })
+	}
+}
 
-		// Check password
-		const isPasswordCorrect = bcrypt.compareSync(
-			req.body.password,
-			data[0].password
-		);
+export const login = async (req, res) => {
+	try {
+		const { username, password } = req.body
 
-		if (!isPasswordCorrect)
-			return res.status(400).json("Wrong username or password!");
+		// Проверка наличия пользователя
+		const user = await prisma.users.findFirst({
+			where: { username: username },
+		})
 
-		const secret = process.env.JWT_SECRET;
-		const token = jwt.sign({ id: data[0].id }, secret);
-		const { password, ...other } = data[0];
+		if (!user) {
+			return res.status(404).json("User not found!")
+		}
+
+		// Проверка правильности пароля
+		const isPasswordCorrect = bcrypt.compareSync(password, user.password)
+
+		if (!isPasswordCorrect) {
+			return res.status(400).json("Wrong username or password!")
+		}
+
+		// Генерация JWT токена
+		const secret = process.env.JWT_SECRET
+		const token = jwt.sign({ id: user.id }, secret)
+
+		// Удаление пароля из данных перед отправкой ответа
+		const { password: _, ...other } = user
 
 		res
 			.cookie("access_token", token, {
 				httpOnly: true,
 			})
 			.status(200)
-			.json(other);
-	});
-};
+			.json(other)
+	} catch (error) {
+		return res.status(500).json({ error: 'Internal Server Error', details: error.message })
+	}
+}
 
 export const logout = (req, res) => {
 	res.clearCookie("access_token", {

@@ -18,6 +18,7 @@ Server:
 - JSON Web Token (securely transmitting information)
 - CORS (cross-origin resource sharing)
 - Multer (uploading files)
+- Moment (parsing, validating, manipulating and displaying date/time in JS)
 
 To run the client and server via concurrently:
 npm run all
