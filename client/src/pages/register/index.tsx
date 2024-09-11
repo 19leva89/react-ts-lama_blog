@@ -2,6 +2,7 @@ import { ChangeEvent, FormEvent, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 
 import axios from 'axios'
+import { BASE_URL } from '../../axios'
 
 const Register = () => {
 	const [inputs, setInputs] = useState({
@@ -21,7 +22,7 @@ const Register = () => {
 		e.preventDefault()
 
 		try {
-			await axios.post('/auth/register', inputs)
+			await axios.post(`${BASE_URL}/auth/register`, inputs)
 
 			navigate('/login')
 		} catch (err: any) {

@@ -5,6 +5,7 @@ import axios from 'axios'
 import moment from 'moment'
 
 import TinyMCEEditor from '../../components/tinymce-editor'
+import { BASE_URL } from '../../axios'
 
 const Write = () => {
 	const { state } = useLocation()
@@ -38,7 +39,7 @@ const Write = () => {
 			const formData = new FormData()
 			formData.append('file', file)
 
-			const res = await axios.post('/upload', formData)
+			const res = await axios.post(`${BASE_URL}/upload`, formData)
 			return res.data
 		} catch (err) {
 			console.error('Image upload failed:', err)
@@ -72,10 +73,10 @@ const Write = () => {
 
 		try {
 			if (state) {
-				await axios.put(`/posts/${state.id}`, postData)
+				await axios.put(`${BASE_URL}/posts/${state.id}`, postData)
 				navigate(`/post/${state.id}`)
 			} else {
-				const response = await axios.post(`/posts/`, postData)
+				const response = await axios.post(`${BASE_URL}/posts/`, postData)
 				navigate(`/post/${response.data.id}`)
 			}
 		} catch (error) {

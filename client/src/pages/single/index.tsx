@@ -11,6 +11,7 @@ import Menu from '../../components/menu'
 
 import Edit from '../../img/edit.svg'
 import Delete from '../../img/delete.svg'
+import { BASE_URL } from '../../axios'
 
 const Single = () => {
 	const [post, setPost] = useState<Partial<UserPost> | null>(null)
@@ -25,7 +26,7 @@ const Single = () => {
 	useEffect(() => {
 		const fetchData = async () => {
 			try {
-				const res = await axios.get(`/posts/${postId}`)
+				const res = await axios.get(`${BASE_URL}/posts/${postId}`)
 
 				setPost(res.data)
 			} catch (err) {
@@ -38,7 +39,7 @@ const Single = () => {
 
 	const handleDelete = async () => {
 		try {
-			await axios.delete(`/posts/${postId}`)
+			await axios.delete(`${BASE_URL}/posts/${postId}`)
 
 			navigate('/')
 		} catch (err) {

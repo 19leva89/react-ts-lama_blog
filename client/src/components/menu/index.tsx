@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 
 import axios from 'axios'
 import { UserPost } from '../../types'
+import { BASE_URL } from '../../axios'
 
 type Props = {
 	category: string
@@ -15,7 +16,7 @@ const Menu: FC<Props> = ({ category, currentPostId }) => {
 	useEffect(() => {
 		const fetchData = async () => {
 			try {
-				const res = await axios.get(`/posts/?category=${category}`)
+				const res = await axios.get(`${BASE_URL}/posts/?category=${category}`)
 
 				setPosts(res.data)
 			} catch (err) {

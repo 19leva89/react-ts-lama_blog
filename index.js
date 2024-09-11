@@ -12,36 +12,45 @@ import upload from "./upload.js";
 dotenv.config();
 const app = express();
 
-// middlewares
+// Allowing Credentials for Cross-Domain Requests
 app.use((req, res, next) => {
 	res.header("Access-Control-Allow-Credentials", true);
 	next();
 });
+
+// Using JSON parsing
 app.use(express.json());
+
+// Setting up CORS to work with cookies
 app.use(
 	cors({
-		origin: "http://localhost:3000",
+		origin:
+			process.env.NODE_ENV === "production"
+				? "https://react-ts-lama-blog.netlify.app"
+				: "http://localhost:3000",
+		credentials: true,
 	})
 );
+
+// Connecting cookie-parser
 app.use(cookieParser());
 
-// multer upload
+// Multer upload
 app.post("/api/upload", upload.single("file"), (req, res) => {
-	if (!req.file) {
-		return res.status(400).json({ error: "No file uploaded" });
+	try {
+		res.status(200).json(req.file.filename);
+
+	} catch (err) {
+		res.status(400).json({ error: "No file uploaded" });
 	}
-	const file = req.file;
-	res.status(200).json(file.filename);
 });
 
-// routes
+// Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/posts", postRoutes);
 
-// server port
-
-
+// Server port
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {
 	console.log(`API working on port ${PORT}!`);

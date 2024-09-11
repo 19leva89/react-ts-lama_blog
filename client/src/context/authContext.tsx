@@ -1,6 +1,7 @@
 import { createContext, ReactNode, useEffect, useState } from 'react'
 import axios from 'axios'
 import { User } from '../types'
+import { BASE_URL } from '../axios'
 
 interface LoginInputs {
 	username: string
@@ -26,12 +27,12 @@ export const AuthContexProvider = ({ children }: AuthContextProviderProps) => {
 	})
 
 	const login = async (inputs: LoginInputs) => {
-		const res = await axios.post('/auth/login', inputs)
+		const res = await axios.post(`${BASE_URL}/auth/login`, inputs)
 		setCurrentUser(res.data)
 	}
 
 	const logout = async () => {
-		await axios.post('/auth/logout')
+		await axios.post(`${BASE_URL}/auth/logout`)
 		setCurrentUser(null)
 	}
 

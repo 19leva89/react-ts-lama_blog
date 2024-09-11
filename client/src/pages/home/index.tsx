@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom'
 
 import { UserPost } from '../../types'
 import axios from 'axios'
+import { BASE_URL } from '../../axios'
 
 const Home = () => {
 	const [posts, setPosts] = useState<UserPost[]>([])
@@ -12,7 +13,7 @@ const Home = () => {
 	useEffect(() => {
 		const fetchData = async () => {
 			try {
-				const res = await axios.get(`/posts${category}`)
+				const res = await axios.get(`${BASE_URL}/posts${category}`)
 				setPosts(res.data)
 			} catch (err) {
 				console.log(err)
