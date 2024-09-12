@@ -2,23 +2,20 @@ import express from "express";
 import dotenv from 'dotenv';
 import cors from "cors";
 import cookieParser from "cookie-parser";
+import path from "path";
+import { fileURLToPath } from 'url';
 
 import authRoutes from "./routes/auth.js";
 import userRoutes from "./routes/users.js";
 import postRoutes from "./routes/posts.js";
-
 import upload from "./upload.js";
+
+// Get __dirname for ES6 modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 dotenv.config();
 const app = express();
-
-// Настройка раздачи статических файлов React
-app.use(express.static(path.join(__dirname, 'client', 'build')));
-
-// Для всех остальных маршрутов отправляем index.html из build
-app.get('*', (req, res) => {
-	res.sendFile(path.join(__dirname, 'client', 'build', 'index.html'));
-});
 
 // Allowing Credentials for Cross-Domain Requests
 app.use((req, res, next) => {
@@ -57,6 +54,14 @@ app.post("/api/upload", upload.single("file"), (req, res) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/posts", postRoutes);
+
+// Setting up React static file serving
+app.use(express.static(path.join(__dirname, 'client', 'build')));
+
+// For all other routes, we send index.html from build
+app.get('*', (req, res) => {
+	res.sendFile(path.join(__dirname, 'client', 'build', 'index.html'));
+});
 
 // Server port
 const PORT = process.env.PORT || 4000;
