@@ -12,6 +12,14 @@ import upload from "./upload.js";
 dotenv.config();
 const app = express();
 
+// Настройка раздачи статических файлов React
+app.use(express.static(path.join(__dirname, 'client', 'build')));
+
+// Для всех остальных маршрутов отправляем index.html из build
+app.get('*', (req, res) => {
+	res.sendFile(path.join(__dirname, 'client', 'build', 'index.html'));
+});
+
 // Allowing Credentials for Cross-Domain Requests
 app.use((req, res, next) => {
 	res.header("Access-Control-Allow-Credentials", true);
@@ -26,7 +34,7 @@ app.use(
 	cors({
 		origin:
 			process.env.NODE_ENV === "production"
-				? "https://react-ts-lama-blog.netlify.app"
+				? "https://react-ts-lama-blog.onrender.com"
 				: "http://localhost:3000",
 		credentials: true,
 	})
@@ -53,5 +61,5 @@ app.use("/api/posts", postRoutes);
 // Server port
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {
-	console.log(`API working on port ${PORT}!`);
+	console.log(`Server is running on port ${PORT}!`);
 });
