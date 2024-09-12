@@ -58,6 +58,10 @@ app.use("/api/posts", postRoutes);
 // Setting up React static file serving
 app.use(express.static(path.join(__dirname, 'client', 'build')));
 
+// Setting up static distribution of uploaded files from the upload folder
+// https://your-domain/upload/file_name
+app.use('/upload', express.static(path.join(__dirname, 'client', 'public', 'upload')));
+
 // For all other routes, we send index.html from build
 app.get('*', (req, res) => {
 	res.sendFile(path.join(__dirname, 'client', 'build', 'index.html'));
