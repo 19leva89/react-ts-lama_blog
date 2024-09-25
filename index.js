@@ -31,7 +31,7 @@ app.use(
 	cors({
 		origin:
 			process.env.NODE_ENV === "production"
-				? "https://react-ts-lama-blog.onrender.com"
+				? "https://react-ts-lama-blog.vercel.app"
 				: "http://localhost:3000",
 		credentials: true,
 	})
