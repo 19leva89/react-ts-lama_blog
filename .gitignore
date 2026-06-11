@@ -67,3 +67,6 @@ src/.DS_Store
 /public/dist
 public/dist
 dist
+
+# env files (can opt-in for committing if needed)
+.env*
